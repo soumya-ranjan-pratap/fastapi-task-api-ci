@@ -27,9 +27,7 @@ jobs:
     
     - name: Run flake8 linting
       run: |
-        # Stop the build if there are Python syntax errors or undefined names
         flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
         flake8 app/ --count --max-line-length=127 --statistics
 
   test:
@@ -99,12 +97,9 @@ jobs:
     
     - name: Test API endpoints
       run: |
-        # Test creating a task
         curl -X POST http://localhost:8000/tasks \
           -H "Content-Type: application/json" \
           -d '{"title":"CI Test Task","description":"Testing from CI"}' || exit 1
-        
-        # Test getting tasks
         curl -f http://localhost:8000/tasks || exit 1
     
     - name: Stop and remove container
@@ -116,8 +111,6 @@ jobs:
     - name: Show Docker image info
       run: |
         docker images fastapi-task-api:latest
-        echo " Docker image size:"
-        docker inspect -f '{{ .Size }}' fastapi-task-api:latest | numfmt --to=iec
 
   security-scan:
     name: Security Scan
@@ -146,45 +139,11 @@ jobs:
     steps:
     - name: Check CI status
       run: |
-        echo "## CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+        echo "### CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "-  Code Quality: Passed" >> $GITHUB_STEP_SUMMARY
-        echo "-  Tests: Passed" >> $GITHUB_STEP_SUMMARY
-        echo "-  Docker Build: Passed" >> $GITHUB_STEP_SUMMARY
-        echo "-  Security Scan: Completed" >> $GITHUB_STEP_SUMMARY
+        echo "- Code Quality: Passed" >> $GITHUB_STEP_SUMMARY
+        echo "- Tests: Passed" >> $GITHUB_STEP_SUMMARY
+        echo "- Docker Build: Passed" >> $GITHUB_STEP_SUMMARY
+        echo "- Security Scan: Completed" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "🎉 All checks passed! Ready for deployment." >> $GITHUB_STEP_SUMMARY
-```
-
----
-
-### **Step 6: Additional Files**
-
-**`.gitignore`:**
-```
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-.pytest_cache/
-.coverage
-coverage.xml
-htmlcov/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Project specific
-*.log
+        echo "All checks passed! Ready for deployment." >> $GITHUB_STEP_SUMMARY
