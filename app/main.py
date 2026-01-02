@@ -59,17 +59,17 @@ async def get_task(task_id: int):
 async def create_task(task: TaskCreate):
     """Create a new task"""
     global task_id_counter
-    
+
     new_task = Task(
         id=task_id_counter,
         title=task.title,
         description=task.description,
         completed=False
     )
-    
+
     tasks_db[task_id_counter] = new_task
     task_id_counter += 1
-    
+
     return new_task
 
 
@@ -81,9 +81,9 @@ async def update_task(task_id: int, task_update: TaskUpdate):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task with id {task_id} not found"
         )
-    
+
     existing_task = tasks_db[task_id]
-    
+
     # Update only provided fields
     if task_update.title is not None:
         existing_task.title = task_update.title
@@ -91,7 +91,7 @@ async def update_task(task_id: int, task_update: TaskUpdate):
         existing_task.description = task_update.description
     if task_update.completed is not None:
         existing_task.completed = task_update.completed
-    
+
     tasks_db[task_id] = existing_task
     return existing_task
 
@@ -108,7 +108,7 @@ async def delete_task(task_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task with id {task_id} not found"
         )
-    
+
     del tasks_db[task_id]
     return None
 
@@ -120,7 +120,7 @@ async def get_task_statistics():
     total_tasks = len(tasks_db)
     completed_tasks = sum(1 for task in tasks_db.values() if task.completed)
     pending_tasks = total_tasks - completed_tasks
-    
+
     return {
         "total": total_tasks,
         "completed": completed_tasks,
