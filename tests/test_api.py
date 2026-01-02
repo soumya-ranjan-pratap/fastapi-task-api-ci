@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app, tasks_db, task_id_counter
+from app.main import app
+import app.main
 
 client = TestClient(app)
 
@@ -8,11 +9,10 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def reset_db():
     """Reset database before each test"""
-    global task_id_counter
-    tasks_db.clear()
-    task_id_counter = 1
+    app.main.tasks_db.clear()
+    app.main.task_id_counter = 1
     yield
-    tasks_db.clear()
+    app.main.tasks_db.clear()
 
 
 def test_root_endpoint():
@@ -77,7 +77,7 @@ def test_get_specific_task():
         "title": "Get This Task"
     })
     task_id = create_response.json()["id"]
-    
+
     # Get the task
     response = client.get(f"/tasks/{task_id}")
     assert response.status_code == 200
@@ -100,7 +100,7 @@ def test_update_task():
         "title": "Original Title"
     })
     task_id = create_response.json()["id"]
-    
+
     # Update the task
     update_data = {
         "title": "Updated Title",
@@ -126,11 +126,11 @@ def test_delete_task():
         "title": "Task to Delete"
     })
     task_id = create_response.json()["id"]
-    
+
     # Delete it
     response = client.delete(f"/tasks/{task_id}")
     assert response.status_code == 204
-    
+
     # Verify it's gone
     get_response = client.get(f"/tasks/{task_id}")
     assert get_response.status_code == 404
@@ -148,7 +148,7 @@ def test_task_statistics():
     client.post("/tasks", json={"title": "Task 1"})
     client.post("/tasks", json={"title": "Task 2"})
     client.put("/tasks/1", json={"completed": True})
-    
+
     # Get statistics
     response = client.get("/tasks/stats/summary")
     assert response.status_code == 200
@@ -166,11 +166,11 @@ def test_multiple_tasks_creation():
         {"title": "Task 2", "description": "Second task"},
         {"title": "Task 3", "description": "Third task"}
     ]
-    
+
     for task in tasks:
         response = client.post("/tasks", json=task)
         assert response.status_code == 201
-    
+
     # Get all tasks
     response = client.get("/tasks")
     assert response.status_code == 200
